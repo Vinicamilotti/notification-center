@@ -23,24 +23,13 @@ func (f *NtfyFacade) getAttribute(attributeName string, dto entities.Notificatio
 	return strVal
 }
 
-func (f *NtfyFacade) determinateTag(statusValue string) string {
-	switch statusValue {
-	case "FIRING":
-		return "rotating_light"
-	case "RESOLVED":
-		return "heavy_check_mark"
-	default:
-		return "warning"
-	}
-}
-
 func (f *NtfyFacade) ProcessRequest(dto entities.NotificationDTO) *domain.NtfyRequest {
 
 	ntfyReq := domain.NtfyRequest{
 		Title:   dto.Title,
 		Message: dto.Message,
 		Click:   f.getAttribute("click", dto),
-		Tag:     f.determinateTag(f.getAttribute("status", dto)),
+		Tag:     []string{f.getAttribute("tag", dto)},
 		Actions: f.parseActions(dto),
 	}
 

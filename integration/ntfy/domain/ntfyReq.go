@@ -11,7 +11,7 @@ type NtfyRequest struct {
 	Title   string       `json:"title"`
 	Message string       `json:"message"`
 	Click   string       `json:"click"`
-	Tag     string       `json:"tag"`
+	Tag     []string     `json:"tag"`
 	Actions []NtfyAction `json:"actions"`
 }
 

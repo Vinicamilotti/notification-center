@@ -2,7 +2,7 @@
     "notification_configs": [
         {
             "type": "ntfy",
-            "channel": "192.168.1.200:9095",
+            "channel": "https://nfty.home.vinicamilotti-lain.xyz",
             "enabled": true,
             "topics": ["*"]
         }

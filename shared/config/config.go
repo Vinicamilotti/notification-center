@@ -64,10 +64,10 @@ func loadConfigs() error {
 }
 
 func initializeTopicsSet() {
-	for _, config := range configs.NotificationConfigs {
-		config.SubscribedTopics = make(map[string]any)
-		for _, topic := range config.SubscribedTopicsList {
-			config.SubscribedTopics[topic] = nil
+	for i := range configs.NotificationConfigs {
+		configs.NotificationConfigs[i].SubscribedTopics = make(map[string]any)
+		for _, topic := range configs.NotificationConfigs[i].SubscribedTopicsList {
+			configs.NotificationConfigs[i].SubscribedTopics[topic] = nil
 		}
 	}
 }

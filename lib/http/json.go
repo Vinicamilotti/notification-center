@@ -18,3 +18,16 @@ func MarshalJsonToBody(body any) (io.Reader, error) {
 
 	return bytes.NewReader(val), nil
 }
+
+func MarshalJsonToString(body any) (string, error) {
+	if body == nil {
+		return "", nil
+	}
+
+	val, err := json.Marshal(body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(val), nil
+}
