@@ -34,7 +34,7 @@ func (f *NtfyFacade) determinateTag(statusValue string) string {
 	}
 }
 
-func (f *NtfyFacade) ProcessRequest(dto entities.NotificationDTO) domain.NtfyRequest {
+func (f *NtfyFacade) ProcessRequest(dto entities.NotificationDTO) *domain.NtfyRequest {
 
 	ntfyReq := domain.NtfyRequest{
 		Title:   dto.Title,
@@ -44,7 +44,18 @@ func (f *NtfyFacade) ProcessRequest(dto entities.NotificationDTO) domain.NtfyReq
 		Actions: f.parseActions(dto),
 	}
 
-	return ntfyReq
+	return &ntfyReq
+}
+
+func getActionType(actionLabel entities.ActionType) domain.NtfyActionType {
+	switch actionLabel {
+	case entities.ActionTypeUrl:
+		return domain.NtfyActionTypeView
+	case entities.ActionTypeHttpCall:
+		return domain.NtfyActionTypeHttp
+	default:
+		return domain.NtfyActionTypeView
+	}
 }
 
 func (f *NtfyFacade) parseActions(dto entities.NotificationDTO) []domain.NtfyAction {
@@ -52,6 +63,7 @@ func (f *NtfyFacade) parseActions(dto entities.NotificationDTO) []domain.NtfyAct
 
 	for _, action := range dto.Actions {
 		ntfyAction := domain.NtfyAction{
+			Type:  getActionType(action.Type),
 			Label: action.Label,
 			Url:   action.Action,
 		}
