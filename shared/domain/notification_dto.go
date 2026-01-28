@@ -1,7 +1,14 @@
 package domain
 
 type NotificationDTO struct {
-	Channel string
-	Title   string
-	Message string
+	Topic               string
+	Title               string
+	Message             string
+	AditionalAttributes map[string]any
+	Actions             []NotificationAction
+}
+
+type NotificationAction struct {
+	Label  string
+	Action string
 }

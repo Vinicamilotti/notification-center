@@ -15,7 +15,7 @@ func NewGrafanaFacade() *GrafanaFacade {
 
 func (f *GrafanaFacade) ProcessAlert(topic string, alert domain.GrafanaAlert) (notificationEntities.NotificationDTO, error) {
 	notification := notificationEntities.NotificationDTO{
-		Channel: topic, // Example channel
+		Topic:   topic, // Example channel
 		Title:   alert.Title,
 		Message: "test",
 	}
