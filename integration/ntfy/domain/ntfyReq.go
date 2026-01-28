@@ -16,9 +16,10 @@ type NtfyRequest struct {
 }
 
 type NtfyAction struct {
-	Type  NtfyActionType `json:"action,omitempty"`
-	Label string         `json:"label,omitempty"`
-	Url   string         `json:"url,omitempty"`
-	Clear bool           `json:"clear,omitempty"`
-	Body  string         `json:"body,omitempty"`
+	Type   NtfyActionType `json:"action,omitempty"`
+	Label  string         `json:"label,omitempty"`
+	Url    string         `json:"url,omitempty"`
+	Clear  bool           `json:"clear,omitempty"`
+	Body   string         `json:"body,omitempty"`
+	Method string         `json:"method,omitempty"`
 }

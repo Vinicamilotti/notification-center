@@ -52,9 +52,10 @@ func (f *NtfyFacade) parseActions(dto entities.NotificationDTO) []domain.NtfyAct
 
 	for _, action := range dto.Actions {
 		ntfyAction := domain.NtfyAction{
-			Type:  getActionType(action.Type),
-			Label: action.Label,
-			Url:   action.Action,
+			Type:   getActionType(action.Type),
+			Label:  action.Label,
+			Url:    action.Action,
+			Method: action.Method,
 		}
 		actions = append(actions, ntfyAction)
 	}

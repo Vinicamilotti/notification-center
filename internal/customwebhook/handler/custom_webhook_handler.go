@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/json"
+
 	"github.com/Vinicamilotti/notification-center/shared/domain"
 	"github.com/Vinicamilotti/notification-center/shared/notification"
 	"github.com/gin-gonic/gin"
@@ -19,30 +21,22 @@ func (h *CustomWebhookHandler) RegisterRoutes(r *gin.Engine) {
 
 func (h *CustomWebhookHandler) HandleCustomWebhook(c *gin.Context) {
 	topic := c.Param("topic")
+	getBody := c.Request.Body
+
+	var payload domain.NotificationDTO
+
+	err := json.NewDecoder(getBody).Decode(&payload)
+	payload.Topic = topic
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid JSON payload"})
+		return
+	}
+
 	sender := notification.GetService()
-	sender.Send(domain.NotificationDTO{
-		Title:   "Custom Webhook",
-		Message: "A custom webhook was received.",
-		Topic:   topic,
-		AditionalAttributes: map[string]any{
-			"tag":   "warning",
-			"click": "https://example.com",
-		},
-		Actions: []domain.NotificationAction{
-			{
-				Type:   domain.ActionTypeUrl,
-				Label:  "View",
-				Action: "https://example.com/view",
-			},
-			{
-				Type:   domain.ActionTypeHttpCall,
-				Label:  "Acknowledge",
-				Action: "https://example.com/acknowledge",
-			},
-		},
-	})
+	sender.Send(payload)
 
 	c.JSON(200, gin.H{
 		"message": "Custom webhook received",
 	})
+
 }

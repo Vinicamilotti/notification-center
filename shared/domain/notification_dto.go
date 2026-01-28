@@ -20,4 +20,5 @@ type NotificationAction struct {
 	Label              string
 	Action             string
 	AditionalParameter any
+	Method             string
 }

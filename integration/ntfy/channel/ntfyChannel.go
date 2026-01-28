@@ -39,9 +39,12 @@ func (nc *NtfyChannel) parseTags(tags []string) string {
 func (nc *NtfyChannel) determinateAction(action []entities.NtfyAction) string {
 	s := ""
 	for _, act := range action {
-		partial := fmt.Sprintf("%s,%s, %s", act.Type, act.Label, act.Url)
+		partial := fmt.Sprintf("%s, %s, %s", act.Type, act.Label, act.Url)
 		if act.Clear {
 			partial = fmt.Sprintf("%s, clear=true", partial)
+		}
+		if act.Method != "" {
+			partial = fmt.Sprintf("%s, method=%s", partial, act.Method)
 		}
 		if act.Body != "" {
 			partial = fmt.Sprintf("%s, body=%s", partial, act.Body)
