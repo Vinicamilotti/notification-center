@@ -1,5 +1,12 @@
 package domain
 
+type ActionType string
+
+const (
+	ActionTypeUrl      ActionType = "url"
+	ActionTypeHttpCall ActionType = "call"
+)
+
 type NotificationDTO struct {
 	Topic               string
 	Title               string
@@ -9,6 +16,8 @@ type NotificationDTO struct {
 }
 
 type NotificationAction struct {
-	Label  string
-	Action string
+	Type               ActionType
+	Label              string
+	Action             string
+	AditionalParameter any
 }
