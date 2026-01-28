@@ -59,11 +59,12 @@ func (nc *NtfyChannel) setHeaders(req *http2.Request, ntfyReq entities.NtfyReque
 	req.Header.Set("tags", nc.parseTags(ntfyReq.Tag))
 	req.Header.Set("click", ntfyReq.Click)
 	req.Header.Set("actions", nc.determinateAction(ntfyReq.Actions))
+	req.Header.Set("Markdown", "yes")
 }
 
 func (nc *NtfyChannel) SendNotification(dto domain.NotificationDTO) error {
 	ntfyReq := nc.NtfyFacade.ProcessRequest(dto)
-	req, err := nc.Client.Post(fmt.Sprintf("/%s", dto.Topic), ntfyReq.Message)
+	req, err := nc.Client.Post(fmt.Sprintf("/%s", dto.Topic), strings.NewReader(ntfyReq.Message))
 	nc.setHeaders(req, *ntfyReq)
 
 	if err != nil {

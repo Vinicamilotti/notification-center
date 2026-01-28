@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -15,16 +16,11 @@ func NewClient(baseURL string) Client {
 	}
 }
 
-func (c *Client) newRequest(method string, path string, body any) (*http.Request, error) {
-	bodyReader, err := MarshalJsonToBody(body)
-
-	if err != nil {
-		return nil, err
-	}
+func (c *Client) newRequest(method string, path string, body io.Reader) (*http.Request, error) {
 
 	url := fmt.Sprintf("%s%s", c.BaseURL, path)
 
-	req, err := http.NewRequest(method, url, bodyReader)
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}
@@ -33,23 +29,23 @@ func (c *Client) newRequest(method string, path string, body any) (*http.Request
 
 }
 
-func (c *Client) Post(path string, body any) (*http.Request, error) {
+func (c *Client) Post(path string, body io.Reader) (*http.Request, error) {
 	return c.newRequest("POST", path, body)
 }
 
-func (c *Client) Get(path string, body any) (*http.Request, error) {
+func (c *Client) Get(path string, body io.Reader) (*http.Request, error) {
 	return c.newRequest("GET", path, body)
 }
 
-func (c *Client) Delete(path string, body any) (*http.Request, error) {
+func (c *Client) Delete(path string, body io.Reader) (*http.Request, error) {
 	return c.newRequest("DELETE", path, body)
 }
 
-func (c *Client) Put(path string, body any) (*http.Request, error) {
+func (c *Client) Put(path string, body io.Reader) (*http.Request, error) {
 	return c.newRequest("PUT", path, body)
 }
 
-func (c *Client) Patch(path string, body any) (*http.Request, error) {
+func (c *Client) Patch(path string, body io.Reader) (*http.Request, error) {
 	return c.newRequest("PATCH", path, body)
 }
 
