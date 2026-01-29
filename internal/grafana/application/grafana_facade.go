@@ -45,9 +45,13 @@ func (f *GrafanaFacade) createMessage(alert domain.GrafanaAlert) string {
 	description := alert.CommonAnnotations.Description
 
 	messageTemplate := `
-	**{{.Sumary}}**
-	{{.Description}}
-	`
+**{{.Sumary}}**
+{{.Description}}
+- Started at: {{.StartedAt}} 
+- Ended at: {{.EndedAt}}
+Values: 
+{{.Values}}
+`
 
 	t, err := template.New("markdown").Parse(messageTemplate)
 
