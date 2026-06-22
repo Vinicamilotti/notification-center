@@ -15,8 +15,15 @@ func ntfyConfig(enabled bool, topics ...string) config.NotificationConfig {
 	}
 }
 
-func TestGetService_ReturnsCurrentService(t *testing.T) {
+// resetService clears the package-level state so each test starts from a clean,
+// uninitialized service.
+func resetService() {
 	notificationService = *NewNotificationSender()
+	initialized = false
+}
+
+func TestGetService_ReturnsCurrentService(t *testing.T) {
+	resetService()
 
 	svc := GetService()
 	if len(svc.Channels) != 0 {
@@ -25,6 +32,8 @@ func TestGetService_ReturnsCurrentService(t *testing.T) {
 }
 
 func TestInit_RegistersNtfyChannel(t *testing.T) {
+	resetService()
+
 	Init(config.Configs{
 		NotificationConfigs: []config.NotificationConfig{
 			ntfyConfig(true, "*"),
@@ -41,6 +50,8 @@ func TestInit_RegistersNtfyChannel(t *testing.T) {
 }
 
 func TestInit_EmptyConfig(t *testing.T) {
+	resetService()
+
 	Init(config.Configs{
 		NotificationConfigs: []config.NotificationConfig{},
 	})
@@ -52,6 +63,8 @@ func TestInit_EmptyConfig(t *testing.T) {
 }
 
 func TestInit_MultipleNtfyChannels(t *testing.T) {
+	resetService()
+
 	Init(config.Configs{
 		NotificationConfigs: []config.NotificationConfig{
 			ntfyConfig(true, "alerts"),
@@ -66,6 +79,8 @@ func TestInit_MultipleNtfyChannels(t *testing.T) {
 }
 
 func TestInit_IgnoresUnknownType(t *testing.T) {
+	resetService()
+
 	Init(config.Configs{
 		NotificationConfigs: []config.NotificationConfig{
 			{Type: config.ConfigType("unknown"), Enabled: true},
@@ -79,24 +94,26 @@ func TestInit_IgnoresUnknownType(t *testing.T) {
 	}
 }
 
-func TestInit_ResetsPreviousChannels(t *testing.T) {
-	Init(config.Configs{
-		NotificationConfigs: []config.NotificationConfig{
-			ntfyConfig(true, "*"),
-			ntfyConfig(true, "alerts"),
-		},
-	})
-	if got := len(GetService().Channels); got != 2 {
-		t.Fatalf("expected 2 channels, got %d", got)
-	}
+func TestInit_IsIdempotent(t *testing.T) {
+	resetService()
 
-	// A second Init with a smaller config must not accumulate channels.
 	Init(config.Configs{
 		NotificationConfigs: []config.NotificationConfig{
 			ntfyConfig(true, "*"),
 		},
 	})
 	if got := len(GetService().Channels); got != 1 {
-		t.Errorf("expected channels to be reset to 1, got %d", got)
+		t.Fatalf("expected 1 channel after first Init, got %d", got)
+	}
+
+	// A second Init must be a no-op: the guard prevents re-registering channels.
+	Init(config.Configs{
+		NotificationConfigs: []config.NotificationConfig{
+			ntfyConfig(true, "*"),
+			ntfyConfig(true, "alerts"),
+		},
+	})
+	if got := len(GetService().Channels); got != 1 {
+		t.Errorf("expected Init to be idempotent (1 channel), got %d", got)
 	}
 }

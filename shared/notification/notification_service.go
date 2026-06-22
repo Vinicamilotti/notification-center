@@ -9,7 +9,13 @@ type NotificationChannelBuilder func(config config.NotificationConfig) Notificat
 
 var notificationService NotificationSender
 
+var initialized = false
+
 func Init(cfg config.Configs) {
+	if initialized {
+		return
+	}
+
 	availableChannels := map[config.ConfigType]NotificationChannelBuilder{
 		config.Ntfy: func(cfg config.NotificationConfig) NotificationChannel {
 			return ntfyChannel.NewNtfyChannel(cfg)
@@ -26,6 +32,8 @@ func Init(cfg config.Configs) {
 			notificationService.RegisterChannel(channel(channelConfig))
 		}
 	}
+
+	initialized = true
 
 }
 
