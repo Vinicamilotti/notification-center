@@ -23,7 +23,7 @@ func bootstrap() {
 
 func main() {
 	bootstrap()
-	app := app.NewApp("192.168.1.200", "9999")
+	app := app.NewApp("0.0.0.0", "9999")
 	grafana := grafanaHandler.NewGrafanaWebhookHandler(grafanaApp.NewGrafanaFacade())
 	custom := customHandler.NewCustomWebhookHandler()
 	test := testHandler.NewTestHandler()
