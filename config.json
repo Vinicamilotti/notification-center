@@ -1,5 +1,10 @@
 {
     "notification_configs": [
-
+        {
+            "type": "ntfy",
+            "channel": "https://example.com/notify",
+            "enabled": true,
+            "topics": ["*"]
+        }
     ]
 }
