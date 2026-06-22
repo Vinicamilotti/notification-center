@@ -1,10 +1,5 @@
 {
     "notification_configs": [
-        {
-            "type": "ntfy",
-            "channel": "https://nfty.home.vinicamilotti-lain.xyz",
-            "enabled": true,
-            "topics": ["*"]
-        }
+
     ]
 }
