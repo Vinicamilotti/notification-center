@@ -13,13 +13,12 @@ import (
 
 func bootstrap() {
 
-	_ = godotenv.Load() 
-	err := config.ReadConfigFile()
+	_ = godotenv.Load()
+	cfg, err := config.GetConfigs()
 	if err != nil {
 		panic(err)
 	}
-
-	notification.Init()
+	notification.Init(cfg)
 }
 
 func main() {

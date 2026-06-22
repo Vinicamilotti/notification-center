@@ -1,45 +1,23 @@
 package notification
 
 import (
-	"encoding/json"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/Vinicamilotti/notification-center/shared/config"
 )
 
-func setupServiceConfig(t *testing.T, cfg config.Configs) (restore func()) {
-	t.Helper()
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		t.Fatalf("marshal error: %v", err)
-	}
-
-	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "config.json"), data, 0644); err != nil {
-		t.Fatalf("write error: %v", err)
-	}
-
-	oldDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("getwd error: %v", err)
-	}
-	if err := os.Chdir(dir); err != nil {
-		t.Fatalf("chdir error: %v", err)
-	}
-
-	// force config package to reload from the new directory
-	config.ReadConfigFile()
-
-	return func() {
-		os.Chdir(oldDir)
-		notificationService = *NewNotificationSender()
+func ntfyConfig(enabled bool, topics ...string) config.NotificationConfig {
+	return config.NotificationConfig{
+		Type:                 config.Ntfy,
+		Enabled:              enabled,
+		Channel:              "http://ntfy.example.com",
+		SubscribedTopicsList: topics,
 	}
 }
 
 func TestGetService_ReturnsCurrentService(t *testing.T) {
 	notificationService = *NewNotificationSender()
+
 	svc := GetService()
 	if len(svc.Channels) != 0 {
 		t.Errorf("expected 0 channels on fresh sender, got %d", len(svc.Channels))
@@ -47,33 +25,25 @@ func TestGetService_ReturnsCurrentService(t *testing.T) {
 }
 
 func TestInit_RegistersNtfyChannel(t *testing.T) {
-	restore := setupServiceConfig(t, config.Configs{
+	Init(config.Configs{
 		NotificationConfigs: []config.NotificationConfig{
-			{
-				Type:                 config.Ntfy,
-				Enabled:              true,
-				Channel:              "http://ntfy.example.com",
-				SubscribedTopicsList: []string{"*"},
-			},
+			ntfyConfig(true, "*"),
 		},
 	})
-	defer restore()
-
-	Init()
 
 	svc := GetService()
 	if len(svc.Channels) != 1 {
-		t.Errorf("expected 1 channel after Init with Ntfy config, got %d", len(svc.Channels))
+		t.Fatalf("expected 1 channel after Init with Ntfy config, got %d", len(svc.Channels))
+	}
+	if svc.Channels[0] == nil {
+		t.Error("expected a non-nil ntfy channel")
 	}
 }
 
 func TestInit_EmptyConfig(t *testing.T) {
-	restore := setupServiceConfig(t, config.Configs{
+	Init(config.Configs{
 		NotificationConfigs: []config.NotificationConfig{},
 	})
-	defer restore()
-
-	Init()
 
 	svc := GetService()
 	if len(svc.Channels) != 0 {
@@ -81,26 +51,13 @@ func TestInit_EmptyConfig(t *testing.T) {
 	}
 }
 
-func TestInit_MultipleChannels(t *testing.T) {
-	restore := setupServiceConfig(t, config.Configs{
+func TestInit_MultipleNtfyChannels(t *testing.T) {
+	Init(config.Configs{
 		NotificationConfigs: []config.NotificationConfig{
-			{
-				Type:                 config.Ntfy,
-				Enabled:              true,
-				Channel:              "http://ntfy.example.com",
-				SubscribedTopicsList: []string{"alerts"},
-			},
-			{
-				Type:                 config.Ntfy,
-				Enabled:              false,
-				Channel:              "http://ntfy2.example.com",
-				SubscribedTopicsList: []string{"metrics"},
-			},
+			ntfyConfig(true, "alerts"),
+			ntfyConfig(false, "metrics"),
 		},
 	})
-	defer restore()
-
-	Init()
 
 	svc := GetService()
 	if len(svc.Channels) != 2 {
@@ -108,26 +65,38 @@ func TestInit_MultipleChannels(t *testing.T) {
 	}
 }
 
-func TestReloadNotificationService(t *testing.T) {
-	restore := setupServiceConfig(t, config.Configs{
+func TestInit_IgnoresUnknownType(t *testing.T) {
+	Init(config.Configs{
 		NotificationConfigs: []config.NotificationConfig{
-			{
-				Type:                 config.Ntfy,
-				Enabled:              true,
-				Channel:              "http://ntfy.example.com",
-				SubscribedTopicsList: []string{"*"},
-			},
+			{Type: config.ConfigType("unknown"), Enabled: true},
+			ntfyConfig(true, "*"),
 		},
 	})
-	defer restore()
 
-	Init()
-	before := len(GetService().Channels)
+	svc := GetService()
+	if len(svc.Channels) != 1 {
+		t.Errorf("expected unknown type to be ignored, got %d channels", len(svc.Channels))
+	}
+}
 
-	ReloadNotificationService()
-	after := len(GetService().Channels)
+func TestInit_ResetsPreviousChannels(t *testing.T) {
+	Init(config.Configs{
+		NotificationConfigs: []config.NotificationConfig{
+			ntfyConfig(true, "*"),
+			ntfyConfig(true, "alerts"),
+		},
+	})
+	if got := len(GetService().Channels); got != 2 {
+		t.Fatalf("expected 2 channels, got %d", got)
+	}
 
-	if before != after {
-		t.Errorf("expected same channel count after reload: before=%d after=%d", before, after)
+	// A second Init with a smaller config must not accumulate channels.
+	Init(config.Configs{
+		NotificationConfigs: []config.NotificationConfig{
+			ntfyConfig(true, "*"),
+		},
+	})
+	if got := len(GetService().Channels); got != 1 {
+		t.Errorf("expected channels to be reset to 1, got %d", got)
 	}
 }

@@ -32,14 +32,9 @@ type Configs struct {
 	NotificationConfigs []NotificationConfig `json:"notification_configs"`
 }
 
-func GetConfigs() Configs {
-	loadConfigs()
-	return configs
-}
-
-func ReadConfigFile() error {
-	initialized = false
-	return loadConfigs()
+func GetConfigs() (Configs, error) {
+	err := loadConfigs()
+	return configs, err
 }
 
 func loadConfigs() error {
