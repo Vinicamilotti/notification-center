@@ -6,14 +6,15 @@ import (
 	grafanaHandler "github.com/Vinicamilotti/notification-center/internal/grafana/handler"
 	testHandler "github.com/Vinicamilotti/notification-center/internal/testWebhook/handler"
 	"github.com/Vinicamilotti/notification-center/lib/app"
-	errorlib "github.com/Vinicamilotti/notification-center/lib/errorLib"
 	"github.com/Vinicamilotti/notification-center/shared/config"
 	"github.com/Vinicamilotti/notification-center/shared/notification"
 	"github.com/joho/godotenv"
 )
 
 func bootstrap() {
-	err := errorlib.ExecMultipleCanError(func() error { return godotenv.Load() }, config.ReadConfigFile)
+
+	_ = godotenv.Load() 
+	err := config.ReadConfigFile()
 	if err != nil {
 		panic(err)
 	}
